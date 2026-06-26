@@ -5,3 +5,4 @@ Kelompok POS :
 - Jendersen (0072)
 - Aditya Yovan Nurhakim (0015)
 - Yudan Saptayana ( 0051)
+- Aditya Eka Saputra (0048)
