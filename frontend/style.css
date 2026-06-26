@@ -1,1 +1,105 @@
+:root {
+    --coklat-tua: #3d2314;
+    --latte: #a07855;
+    --cream: #f4ebd0;
+    --cream-light: #faf7f0;
+    --text-dark: #2b1a10;
+}
 
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--cream-light);
+    color: var(--text-dark);
+}
+
+header {
+    background-color: var(--coklat-tua);
+    color: var(--cream);
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.pos-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 2rem auto;
+    gap: 2rem;
+    padding: 0 1rem;
+}
+
+.menu-section {
+    flex: 2;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.product-card {
+    background: white;
+    border: 1px solid var(--latte);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--coklat-tua);
+}
+
+.product-card h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--coklat-tua);
+}
+
+.product-card p {
+    color: var(--latte);
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.btn-add {
+    background-color: var(--latte);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-add:hover {
+    background-color: var(--coklat-tua);
+}
+
+/* Sidebar Cart */
+.cart-section {
+    flex: 1;
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid var(--latte);
+    height: fit-content;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.total-box {
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--coklat-tua);
+    display: flex;
+    justify-content: space-between;
+}
