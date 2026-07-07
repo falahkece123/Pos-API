@@ -153,38 +153,3 @@
   <div class="footer__bottom">© 2026 JAWAIN. Dibuat dengan secangkir kopi dan sedikit kode.</div>
 </footer>
 
-<!-- ===== CART DRAWER ===== -->
-<div class="overlay" id="overlay"></div>
-<aside class="cart" id="cartDrawer" aria-label="Keranjang pesanan">
-  <div class="cart__head">
-    <h3>Keranjang Pesanan</h3>
-    <button class="cart__close" id="cartClose" aria-label="Tutup keranjang">✕</button>
-  </div>
-  <div class="cart__items" id="cartItems">
-    <p class="cart__empty">Keranjang masih kosong. Yuk pilih menu dulu ☕</p>
-  </div>
-  <form class="cart__form" id="orderForm">
-    <div class="cart__total">
-      <span>Total</span>
-      <strong id="cartTotal">Rp 0</strong>
-    </div>
-    <label>
-      Nama Pemesan
-      <input type="text" name="nama" id="namaPemesan" placeholder="cth: Rangga" required>
-    </label>
-    <label>
-      Nomor WhatsApp
-      <input type="tel" name="telepon" id="teleponPemesan" placeholder="cth: 08123456789" required>
-    </label>
-    <label>
-      Catatan (opsional)
-      <textarea name="catatan" id="catatanPemesan" placeholder="cth: gula sedikit, ambil di kasir" rows="2"></textarea>
-    </label>
-    <button type="submit" class="btn btn--primary btn--block" id="submitOrderBtn">Pesan Sekarang</button>
-    <p class="cart__status" id="orderStatus"></p>
-  </form>
-</aside>
-
-<script src="js/script.js"></script>
-</body>
-</html>
