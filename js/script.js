@@ -80,7 +80,7 @@ function addToCart(id) {
   const item = allMenuItems.find((i) => String(i.id) === String(id));
   if (!item) return;
 
-  const existing = cart.find((c) => c.id === item.id);
+  const existing = cart.find((c) => String(c.id) === String(item.id));
   if (existing) {
     existing.qty += 1;
   } else {
@@ -91,11 +91,13 @@ function addToCart(id) {
 }
 
 function changeQty(id, delta) {
-  const line = cart.find((c) => c.id === id);
+  // Pakai String() di kedua sisi, supaya id angka (dari database D1)
+  // maupun id teks tetap bisa cocok saat dibandingkan.
+  const line = cart.find((c) => String(c.id) === String(id));
   if (!line) return;
   line.qty += delta;
   if (line.qty <= 0) {
-    cart = cart.filter((c) => c.id !== id);
+    cart = cart.filter((c) => String(c.id) !== String(id));
   }
   renderCart();
 }
