@@ -1,13 +1,1 @@
-{
-  "name": "jawain-coffee-shop",
-  "version": "1.0.0",
-  "description": "Website JAWAIN - kedai kopi online. Frontend HTML/CSS/JS + backend Cloudflare Pages Functions.",
-  "private": true,
-  "scripts": {
-    "dev": "wrangler pages dev . --port 8788"
-  },
-  "devDependencies": {
-    "wrangler": "^3.90.0"
-  }
-}
 
