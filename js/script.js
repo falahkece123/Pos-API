@@ -51,19 +51,41 @@ function clearSession() {
 function updateAccountUI() {
   const label = document.getElementById("accountLabel");
   const cartInfo = document.getElementById("cartAccountInfo");
-  const guestFields = document.getElementById("guestFields");
   if (currentUser) {
     label.textContent = `Halo, ${currentUser.name.split(" ")[0]} (Keluar)`;
     if (cartInfo) {
       cartInfo.textContent = `Dipesan atas nama ${currentUser.name} — ${currentUser.phone || "-"}`;
     }
-    // Sudah login: nama & telepon otomatis dari akun, jadi field tamu disembunyikan.
-    if (guestFields) guestFields.hidden = true;
   } else {
     label.textContent = "Masuk / Daftar";
     if (cartInfo) cartInfo.textContent = "";
-    // Belum login: tetap bisa pesan sebagai tamu, tampilkan field nama & WhatsApp.
-    if (guestFields) guestFields.hidden = false;
+  }
+}
+
+// ---------------------------------------------------------------------
+// GERBANG LOGIN (validasi lanjutan)
+// index.html sudah punya penjaga inline di <head> yang mengecek APAKAH
+// ada token tersimpan. Di sini kita validasi lagi ke server APAKAH
+// token itu MASIH BERLAKU (misalnya belum kedaluwarsa/dihapus). Kalau
+// tidak valid, sesi dihapus dan pelanggan diarahkan ke halaman login.
+// ---------------------------------------------------------------------
+async function verifySessionOrRedirect() {
+  if (!authToken) {
+    window.location.replace("login.html?next=" + encodeURIComponent(window.location.href));
+    return;
+  }
+  try {
+    const res = await fetch("/api/auth/me", {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    if (!res.ok) throw new Error("Sesi tidak valid");
+    const data = await res.json();
+    currentUser = data.user;
+    localStorage.setItem("jawain_user", JSON.stringify(currentUser));
+    updateAccountUI();
+  } catch {
+    clearSession();
+    window.location.replace("login.html?next=" + encodeURIComponent(window.location.href));
   }
 }
 
@@ -256,38 +278,22 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     return;
   }
 
-  // Pesanan sekarang BISA tanpa login (checkout sebagai tamu).
-  // Kalau sudah login, nama & WhatsApp otomatis dari akun.
-  // Kalau belum login, ambil dari field nama/WhatsApp tamu di keranjang.
-  const catatan = document.getElementById("catatanPemesan").value;
-  let guestName = "";
-  let guestPhone = "";
-
+  // Pesanan wajib pakai akun yang login (nama & WhatsApp diambil dari akun).
+  // Dalam kondisi normal ini tidak akan kepakai karena index.html sudah
+  // memblokir akses tanpa login, tapi tetap dijaga di sini untuk berjaga-jaga
+  // (misal sesi baru saja kedaluwarsa sementara halaman masih terbuka).
   if (!currentUser) {
-    guestName = document.getElementById("guestName").value.trim();
-    guestPhone = document.getElementById("guestPhone").value.trim();
-
-    if (!guestName) {
-      statusEl.textContent = "Nama pemesan wajib diisi.";
-      statusEl.className = "cart__status is-error";
-      document.getElementById("guestName").focus();
-      return;
-    }
-    if (!guestPhone) {
-      statusEl.textContent = "Nomor WhatsApp wajib diisi.";
-      statusEl.className = "cart__status is-error";
-      document.getElementById("guestPhone").focus();
-      return;
-    }
+    statusEl.textContent = "Sesi login berakhir, silakan masuk lagi.";
+    statusEl.className = "cart__status is-error";
+    window.location.href = "login.html?next=" + encodeURIComponent(window.location.href);
+    return;
   }
 
+  const catatan = document.getElementById("catatanPemesan").value;
   const payload = {
     items: cart.map((c) => ({ id: c.id, name: c.name, qty: c.qty, price: c.price })),
     total: cart.reduce((sum, c) => sum + c.price * c.qty, 0),
     catatan,
-    // guestName/guestPhone diabaikan backend kalau request sudah login
-    guestName,
-    guestPhone,
   };
 
   submitBtn.disabled = true;
@@ -295,13 +301,12 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
   statusEl.textContent = "";
 
   try {
-    const headers = { "Content-Type": "application/json" };
-    // Kirim header Authorization hanya kalau memang sedang login.
-    if (authToken) headers.Authorization = `Bearer ${authToken}`;
-
     const res = await fetch("/api/order", {
       method: "POST",
-      headers,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
       body: JSON.stringify(payload),
     });
     const data = await res.json();
@@ -309,7 +314,7 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     if (res.status === 401) {
       // Sesi kadaluarsa/tidak valid -> minta login ulang
       clearSession();
-      throw new Error("Sesi login berakhir, silakan masuk lagi atau lanjutkan sebagai tamu.");
+      throw new Error("Sesi login berakhir, silakan masuk lagi.");
     }
     if (!res.ok) throw new Error(data.message || "Gagal mengirim pesanan");
 
@@ -317,11 +322,9 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     statusEl.className = "cart__status is-success";
 
     // Tampilkan struk yang bisa didownload
-    const namaStruk = currentUser ? currentUser.name : guestName;
-    const teleponStruk = currentUser ? currentUser.phone : guestPhone;
     showReceiptModal({
       orderId: data.orderId,
-      customer: { nama: namaStruk, telepon: teleponStruk, catatan },
+      customer: { nama: currentUser.name, telepon: currentUser.phone, catatan },
       items: payload.items,
       total: payload.total,
     });
@@ -525,4 +528,4 @@ function showReceiptModal(order) {
 // ---------------------------------------------------------------------
 loadMenu();
 renderCart(); // tampilkan isi keranjang yang tersimpan dari kunjungan sebelumnya
-updateAccountUI(); // tampilkan status login yang tersimpan dari kunjungan sebelumnya
+verifySessionOrRedirect(); // pastikan sesi login masih berlaku, kalau tidak -> ke login.html
