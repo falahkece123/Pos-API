@@ -541,3 +541,110 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   display: block;
 }
 .receipt-modal__actions { display: flex; }
+
+/* =====================================================================
+   AKUN: tombol navbar + modal login/daftar
+   ===================================================================== */
+.account__btn {
+  background: none;
+  border: 1.5px solid var(--coffee-dark);
+  color: var(--coffee-dark);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.88rem;
+  touch-action: manipulation;
+  margin-right: 8px;
+}
+.account__btn:hover { background: var(--cream); }
+
+.cart__account-info {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 4px 0 0;
+}
+
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.auth-modal[hidden] { display: none; }
+.auth-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(43, 27, 18, 0.45);
+}
+.auth-modal__box {
+  position: relative;
+  background: var(--cream-light);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: var(--shadow-hover);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.auth-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--coffee-dark);
+  touch-action: manipulation;
+}
+.auth-modal__tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.auth-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 2px solid var(--latte-light);
+  padding: 10px 4px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.auth-tab.is-active {
+  color: var(--coffee-dark);
+  border-bottom-color: var(--coffee-dark);
+}
+.auth-form[hidden] { display: none; }
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+.auth-form input {
+  border: 1.5px solid var(--latte-light);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+}
+.auth-form__status {
+  font-size: 0.85rem;
+  min-height: 1.1em;
+}
+.auth-form__status.is-error { color: #b3261e; }
+.auth-form__status.is-success { color: #1e7b34; }
