@@ -25,6 +25,9 @@
       <a href="#cara-pesan">Cara Pesan</a>
       <a href="#kontak">Kontak</a>
     </nav>
+    <button class="account__btn" id="accountBtn" aria-label="Akun">
+      👤 <span id="accountLabel">Masuk / Daftar</span>
+    </button>
     <button class="cart__btn" id="cartBtn" aria-label="Buka keranjang">
       🛒 <span id="cartCount">0</span>
     </button>
@@ -168,14 +171,7 @@
       <span>Total</span>
       <strong id="cartTotal">Rp 0</strong>
     </div>
-    <label>
-      Nama Pemesan
-      <input type="text" name="nama" id="namaPemesan" placeholder="cth: Rangga" required>
-    </label>
-    <label>
-      Nomor WhatsApp
-      <input type="tel" name="telepon" id="teleponPemesan" placeholder="cth: 08123456789" required>
-    </label>
+    <p class="cart__account-info" id="cartAccountInfo"></p>
     <label>
       Catatan (opsional)
       <textarea name="catatan" id="catatanPemesan" placeholder="cth: gula sedikit, ambil di kasir" rows="2"></textarea>
@@ -184,6 +180,55 @@
     <p class="cart__status" id="orderStatus"></p>
   </form>
 </aside>
+
+<!-- ===== MODAL LOGIN / DAFTAR ===== -->
+<div class="auth-modal" id="authModal" hidden>
+  <div class="auth-modal__backdrop" id="authModalBackdrop"></div>
+  <div class="auth-modal__box">
+    <button class="auth-modal__close" id="authModalClose" aria-label="Tutup">✕</button>
+
+    <div class="auth-modal__tabs">
+      <button class="auth-tab is-active" id="tabLogin" data-tab="login">Masuk</button>
+      <button class="auth-tab" id="tabRegister" data-tab="register">Daftar Akun</button>
+    </div>
+
+    <!-- Form Login -->
+    <form class="auth-form" id="loginForm">
+      <label>
+        Email
+        <input type="email" id="loginEmail" required>
+      </label>
+      <label>
+        Password
+        <input type="password" id="loginPassword" required>
+      </label>
+      <button type="submit" class="btn btn--primary btn--block">Masuk</button>
+      <p class="auth-form__status" id="loginStatus"></p>
+    </form>
+
+    <!-- Form Daftar -->
+    <form class="auth-form" id="registerForm" hidden>
+      <label>
+        Nama Lengkap
+        <input type="text" id="registerName" required>
+      </label>
+      <label>
+        Email
+        <input type="email" id="registerEmail" required>
+      </label>
+      <label>
+        Nomor WhatsApp
+        <input type="tel" id="registerPhone" required>
+      </label>
+      <label>
+        Password
+        <input type="password" id="registerPassword" placeholder="minimal 6 karakter" required>
+      </label>
+      <button type="submit" class="btn btn--primary btn--block">Daftar & Masuk</button>
+      <p class="auth-form__status" id="registerStatus"></p>
+    </form>
+  </div>
+</div>
 
 <script src="js/script.js"></script>
 </body>
