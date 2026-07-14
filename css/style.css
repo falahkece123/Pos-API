@@ -699,6 +699,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 .auth-page__sub a { text-decoration: underline; color: var(--coffee-dark); font-weight: 600; }
 .auth-page__already { display: flex; flex-direction: column; gap: 12px; }
+.auth-page__already[hidden] { display: none; }
+#authFormsWrap[hidden] { display: none; }
 
 @media (max-width: 860px) {
   .auth-page__inner { grid-template-columns: 1fr; }
