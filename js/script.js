@@ -9,6 +9,50 @@
 let cart = [];
 let allMenuItems = [];
 
+// ---------------------------------------------------------------------
+// STATE AKUN / LOGIN
+// Token & data user disimpan di localStorage supaya pelanggan tidak
+// perlu login ulang setiap kali membuka halaman (beda dengan keranjang
+// yang sengaja tidak dipersist).
+// ---------------------------------------------------------------------
+let authToken = localStorage.getItem("jawain_token") || null;
+let currentUser = null;
+try {
+  currentUser = JSON.parse(localStorage.getItem("jawain_user") || "null");
+} catch {
+  currentUser = null;
+}
+
+function saveSession(token, user) {
+  authToken = token;
+  currentUser = user;
+  localStorage.setItem("jawain_token", token);
+  localStorage.setItem("jawain_user", JSON.stringify(user));
+  updateAccountUI();
+}
+
+function clearSession() {
+  authToken = null;
+  currentUser = null;
+  localStorage.removeItem("jawain_token");
+  localStorage.removeItem("jawain_user");
+  updateAccountUI();
+}
+
+function updateAccountUI() {
+  const label = document.getElementById("accountLabel");
+  const cartInfo = document.getElementById("cartAccountInfo");
+  if (currentUser) {
+    label.textContent = `Halo, ${currentUser.name.split(" ")[0]} (Keluar)`;
+    if (cartInfo) {
+      cartInfo.textContent = `Dipesan atas nama ${currentUser.name} — ${currentUser.phone || "-"}`;
+    }
+  } else {
+    label.textContent = "Masuk / Daftar";
+    if (cartInfo) cartInfo.textContent = "";
+  }
+}
+
 const rupiah = (angka) =>
   "Rp " + angka.toLocaleString("id-ID");
 
@@ -162,6 +206,115 @@ document.getElementById("cartClose").addEventListener("click", closeCart);
 overlay.addEventListener("click", closeCart);
 
 // ---------------------------------------------------------------------
+// 4b. MODAL LOGIN / DAFTAR
+// ---------------------------------------------------------------------
+const authModal = document.getElementById("authModal");
+const accountBtn = document.getElementById("accountBtn");
+
+function openAuthModal() {
+  authModal.hidden = false;
+}
+function closeAuthModal() {
+  authModal.hidden = true;
+}
+
+accountBtn.addEventListener("click", async () => {
+  // Kalau sedang login, tombol ini berfungsi sebagai logout
+  if (currentUser) {
+    try {
+      await fetch("/api/auth/me", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+    } catch {
+      // Meski request gagal (misal offline), tetap hapus sesi di sisi frontend
+    }
+    clearSession();
+    return;
+  }
+  openAuthModal();
+});
+
+document.getElementById("authModalClose").addEventListener("click", closeAuthModal);
+document.getElementById("authModalBackdrop").addEventListener("click", closeAuthModal);
+
+// Tab switch Login <-> Daftar
+document.querySelectorAll(".auth-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".auth-tab").forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+
+    const isLogin = tab.dataset.tab === "login";
+    document.getElementById("loginForm").hidden = !isLogin;
+    document.getElementById("registerForm").hidden = isLogin;
+  });
+});
+
+// Submit form Login
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const statusEl = document.getElementById("loginStatus");
+  statusEl.textContent = "Sedang masuk...";
+  statusEl.className = "auth-form__status";
+
+  try {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: document.getElementById("loginEmail").value,
+        password: document.getElementById("loginPassword").value,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Gagal masuk");
+
+    saveSession(data.token, data.user);
+    statusEl.textContent = "Berhasil masuk!";
+    statusEl.className = "auth-form__status is-success";
+    setTimeout(closeAuthModal, 600);
+    e.target.reset();
+  } catch (err) {
+    statusEl.textContent = err.message;
+    statusEl.className = "auth-form__status is-error";
+  }
+});
+
+// Submit form Daftar
+document.getElementById("registerForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const statusEl = document.getElementById("registerStatus");
+  statusEl.textContent = "Sedang mendaftar...";
+  statusEl.className = "auth-form__status";
+
+  try {
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: document.getElementById("registerName").value,
+        email: document.getElementById("registerEmail").value,
+        phone: document.getElementById("registerPhone").value,
+        password: document.getElementById("registerPassword").value,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Gagal mendaftar");
+
+    saveSession(data.token, data.user);
+    statusEl.textContent = "Akun berhasil dibuat!";
+    statusEl.className = "auth-form__status is-success";
+    setTimeout(closeAuthModal, 600);
+    e.target.reset();
+  } catch (err) {
+    statusEl.textContent = err.message;
+    statusEl.className = "auth-form__status is-error";
+  }
+});
+
+updateAccountUI();
+
+// ---------------------------------------------------------------------
 // 5. KIRIM PESANAN KE BACKEND
 // ---------------------------------------------------------------------
 document.getElementById("orderForm").addEventListener("submit", async (e) => {
@@ -175,14 +328,19 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     return;
   }
 
+  // Pesanan wajib pakai akun yang login (nama & WhatsApp diambil dari akun)
+  if (!currentUser) {
+    statusEl.textContent = "Silakan masuk atau daftar akun dulu sebelum memesan.";
+    statusEl.className = "cart__status is-error";
+    openAuthModal();
+    return;
+  }
+
+  const catatan = document.getElementById("catatanPemesan").value;
   const payload = {
-    customer: {
-      nama: document.getElementById("namaPemesan").value,
-      telepon: document.getElementById("teleponPemesan").value,
-      catatan: document.getElementById("catatanPemesan").value,
-    },
     items: cart.map((c) => ({ id: c.id, name: c.name, qty: c.qty, price: c.price })),
     total: cart.reduce((sum, c) => sum + c.price * c.qty, 0),
+    catatan,
   };
 
   submitBtn.disabled = true;
@@ -192,11 +350,19 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
   try {
     const res = await fetch("/api/order", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
       body: JSON.stringify(payload),
     });
     const data = await res.json();
 
+    if (res.status === 401) {
+      // Sesi kadaluarsa/tidak valid -> minta login ulang
+      clearSession();
+      throw new Error("Sesi login berakhir, silakan masuk lagi.");
+    }
     if (!res.ok) throw new Error(data.message || "Gagal mengirim pesanan");
 
     statusEl.textContent = `Pesanan diterima! Kode pesanan: ${data.orderId}`;
@@ -205,7 +371,7 @@ document.getElementById("orderForm").addEventListener("submit", async (e) => {
     // Tampilkan struk yang bisa didownload
     showReceiptModal({
       orderId: data.orderId,
-      customer: payload.customer,
+      customer: { nama: currentUser.name, telepon: currentUser.phone, catatan },
       items: payload.items,
       total: payload.total,
     });
