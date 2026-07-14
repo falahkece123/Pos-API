@@ -483,6 +483,20 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .cart__status.is-success { color: #3f7a3f; }
 .cart__status.is-error { color: #a8462f; }
 
+.cart__guest-fields {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 12px; border-radius: var(--radius-sm);
+  background: var(--latte-light);
+}
+.cart__guest-hint {
+  font-size: 0.8rem; color: var(--text-muted); margin: 0;
+}
+.cart__login-link {
+  background: none; border: none; padding: 0;
+  color: var(--coffee-dark); font-weight: 700;
+  text-decoration: underline; cursor: pointer; font-size: inherit;
+}
+
 /* =========================================================
    Receipt Modal (Struk Pesanan)
    ========================================================= */
@@ -648,3 +662,55 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 .auth-form__status.is-error { color: #b3261e; }
 .auth-form__status.is-success { color: #1e7b34; }
+
+/* =========================================================
+   Halaman Login / Daftar (login.html) — sebelumnya modal/layer,
+   sekarang halaman tersendiri sebelum masuk ke halaman pemesanan.
+   ========================================================= */
+.auth-page {
+  padding: 56px 0 80px;
+  min-height: calc(100vh - 76px);
+  display: flex;
+  align-items: center;
+}
+.auth-page__back { padding: 8px 16px; font-size: 0.85rem; }
+.auth-page__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+.auth-page__visual {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+}
+.auth-page__tagline {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--coffee-dark);
+  max-width: 320px;
+}
+.auth-page__card {
+  background: var(--cream-light);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  box-shadow: var(--shadow-hover);
+}
+.auth-page__title { margin-bottom: 8px; font-size: 1.6rem; }
+.auth-page__sub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+.auth-page__sub a { text-decoration: underline; color: var(--coffee-dark); font-weight: 600; }
+.auth-page__already { display: flex; flex-direction: column; gap: 12px; }
+
+@media (max-width: 860px) {
+  .auth-page__inner { grid-template-columns: 1fr; }
+  .auth-page__visual { order: -1; }
+  .auth-page__card { padding: 28px 22px; }
+}
