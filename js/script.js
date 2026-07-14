@@ -46,6 +46,15 @@ function clearSession() {
   localStorage.removeItem("jawain_token");
   localStorage.removeItem("jawain_user");
   updateAccountUI();
+
+  // Kosongkan juga keranjang: kalau tidak, pesanan yang belum dikirim
+  // dari akun sebelumnya akan ikut terbawa ke akun berikutnya yang login
+  // di perangkat/browser yang sama.
+  cart = [];
+  localStorage.removeItem("jawain_cart");
+  if (document.getElementById("cartItems")) {
+    renderCart();
+  }
 }
 
 function updateAccountUI() {
