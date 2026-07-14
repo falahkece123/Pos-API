@@ -489,20 +489,6 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .cart__status.is-success { color: #3f7a3f; }
 .cart__status.is-error { color: #a8462f; }
 
-.cart__guest-fields {
-  display: flex; flex-direction: column; gap: 12px;
-  padding: 12px; border-radius: var(--radius-sm);
-  background: var(--latte-light);
-}
-.cart__guest-hint {
-  font-size: 0.8rem; color: var(--text-muted); margin: 0;
-}
-.cart__login-link {
-  background: none; border: none; padding: 0;
-  color: var(--coffee-dark); font-weight: 700;
-  text-decoration: underline; cursor: pointer; font-size: inherit;
-}
-
 /* =========================================================
    Receipt Modal (Struk Pesanan)
    ========================================================= */
