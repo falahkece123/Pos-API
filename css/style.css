@@ -665,7 +665,6 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   display: flex;
   align-items: center;
 }
-.auth-page__back { padding: 8px 16px; font-size: 0.85rem; }
 .auth-page__inner {
   display: grid;
   grid-template-columns: 1fr 1fr;
