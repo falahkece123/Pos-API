@@ -3,6 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--
+  GERBANG LOGIN: script ini SENGAJA diletakkan paling atas & inline
+  (bukan file terpisah), supaya jalan duluan sebelum halaman sempat
+  digambar. Kalau belum ada sesi login tersimpan, pengunjung langsung
+  dialihkan ke login.html sebelum melihat isi halaman utama sama sekali.
+  Validasi lebih lanjut (apakah token itu masih berlaku di server)
+  dilakukan lagi oleh js/script.js setelah halaman ini dimuat.
+-->
+<script>
+  (function () {
+    try {
+      var token = localStorage.getItem("jawain_token");
+      if (!token) {
+        var next = encodeURIComponent(window.location.href);
+        window.location.replace("login.html?next=" + next);
+      }
+    } catch (e) {
+      window.location.replace("login.html");
+    }
+  })();
+</script>
 <title>JAWAIN — Kopi Rumahan, Rasa Kampung Halaman</title>
 <meta name="description" content="JAWAIN, kedai kopi dengan racikan khas nusantara. Pesan online, seduh dengan hangat.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,20 +133,25 @@
 <section class="how" id="cara-pesan">
   <div class="container">
     <div class="story__badge">03 — Cara Pesan</div>
-    <h2 class="section__title">Tiga langkah, satu cangkir</h2>
+    <h2 class="section__title">Empat langkah, satu cangkir</h2>
     <div class="how__grid">
       <div class="how__card">
         <span class="how__num">Langkah 1</span>
+        <h3>Masuk / Daftar Akun</h3>
+        <p>Buat akun atau masuk dulu, supaya nama & WhatsApp kamu otomatis terisi tiap pesan.</p>
+      </div>
+      <div class="how__card">
+        <span class="how__num">Langkah 2</span>
         <h3>Pilih Menu</h3>
         <p>Tambahkan kopi favoritmu ke keranjang lewat tombol "Tambah" di setiap kartu menu.</p>
       </div>
       <div class="how__card">
-        <span class="how__num">Langkah 2</span>
-        <h3>Isi Data Pesanan</h3>
-        <p>Buka keranjang, lengkapi nama dan catatan (misal: level manis, alamat ambil).</p>
+        <span class="how__num">Langkah 3</span>
+        <h3>Isi Catatan</h3>
+        <p>Buka keranjang, lengkapi catatan kalau perlu (misal: level manis, alamat ambil).</p>
       </div>
       <div class="how__card">
-        <span class="how__num">Langkah 3</span>
+        <span class="how__num">Langkah 4</span>
         <h3>Kirim Pesanan</h3>
         <p>Klik "Pesan Sekarang". Pesanan langsung tercatat di sistem kami untuk diseduh.</p>
       </div>
@@ -172,17 +198,6 @@
       <strong id="cartTotal">Rp 0</strong>
     </div>
     <p class="cart__account-info" id="cartAccountInfo"></p>
-    <div class="cart__guest-fields" id="guestFields">
-      <p class="cart__guest-hint">Belum punya akun? Isi data di bawah ini, atau <a href="login.html" class="cart__login-link">masuk / daftar</a> supaya lebih cepat lain kali.</p>
-      <label>
-        Nama Pemesan
-        <input type="text" name="guestName" id="guestName" placeholder="Nama kamu" autocomplete="name">
-      </label>
-      <label>
-        Nomor WhatsApp
-        <input type="tel" name="guestPhone" id="guestPhone" placeholder="08xxxxxxxxxx" autocomplete="tel">
-      </label>
-    </div>
     <label>
       Catatan (opsional)
       <textarea name="catatan" id="catatanPemesan" placeholder="cth: gula sedikit, ambil di kasir" rows="2"></textarea>
