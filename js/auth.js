@@ -29,6 +29,10 @@ function clearSession() {
   currentUser = null;
   localStorage.removeItem("jawain_token");
   localStorage.removeItem("jawain_user");
+
+  // Kosongkan juga keranjang tersimpan, supaya akun berikutnya yang login
+  // di perangkat/browser yang sama tidak mewarisi pesanan akun sebelumnya.
+  localStorage.removeItem("jawain_cart");
 }
 
 // Kalau ada "?next=..." di URL, dipakai sebagai tujuan redirect setelah
