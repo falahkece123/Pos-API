@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masuk / Daftar — JAWAIN</title>
+<meta name="description" content="Masuk atau buat akun JAWAIN supaya pemesanan kopi berikutnya lebih cepat.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ===== NAVBAR SEDERHANA ===== -->
+<header class="navbar" id="navbar">
+  <div class="container navbar__inner">
+    <a href="index.html#top" class="brand">
+      <span class="brand__mark">☕</span>
+      <span class="brand__name">JAWAIN</span>
+    </a>
+    <a href="index.html#menu" class="btn btn--ghost auth-page__back">← Kembali ke menu</a>
+  </div>
+</header>
+
+<!-- ===== HALAMAN LOGIN / DAFTAR ===== -->
+<main class="auth-page">
+  <div class="container auth-page__inner">
+
+    <div class="auth-page__visual" aria-hidden="true">
+      <div class="steam">
+        <span></span><span></span><span></span>
+      </div>
+      <svg viewBox="0 0 240 220" class="cup-illustration">
+        <ellipse cx="100" cy="200" rx="70" ry="10" fill="#3C2A21" opacity="0.15"/>
+        <path d="M40 70 h130 v75 a65 65 0 0 1 -65 65 h0 a65 65 0 0 1 -65 -65 z" fill="#FFF8F0" stroke="#3C2A21" stroke-width="4"/>
+        <ellipse cx="105" cy="70" rx="65" ry="14" fill="#6F4E37"/>
+        <ellipse cx="105" cy="70" rx="65" ry="14" fill="none" stroke="#3C2A21" stroke-width="4"/>
+        <path d="M170 85 q35 0 35 35 q0 35 -35 35" fill="none" stroke="#3C2A21" stroke-width="6" stroke-linecap="round"/>
+        <path d="M55 62 q10 -14 22 0" fill="none" stroke="#C8A27D" stroke-width="5" stroke-linecap="round"/>
+        <path d="M92 62 q10 -14 22 0" fill="none" stroke="#C8A27D" stroke-width="5" stroke-linecap="round"/>
+        <path d="M129 62 q10 -14 22 0" fill="none" stroke="#C8A27D" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <p class="auth-page__tagline">Simpan nama &amp; nomor WhatsApp kamu,<br>biar pesan kopi berikutnya lebih cepat.</p>
+    </div>
+
+    <div class="auth-page__card">
+
+      <!-- Tampil kalau pelanggan sudah login duluan -->
+      <div class="auth-page__already" id="alreadyLoggedIn" hidden>
+        <h1 class="section__title auth-page__title">Kamu sudah masuk</h1>
+        <p class="auth-page__sub" id="alreadyLoggedInText"></p>
+        <a href="index.html#menu" class="btn btn--primary btn--block">Lanjut ke menu</a>
+        <button type="button" class="btn btn--ghost btn--block" id="logoutBtn">Keluar dari akun ini</button>
+      </div>
+
+      <div id="authFormsWrap">
+        <h1 class="section__title auth-page__title">Masuk atau buat akun</h1>
+        <p class="auth-page__sub">Akun bersifat opsional — kamu tetap bisa <a href="index.html#menu">pesan sebagai tamu</a> tanpa akun.</p>
+
+        <div class="auth-modal__tabs">
+          <button class="auth-tab is-active" id="tabLogin" data-tab="login">Masuk</button>
+          <button class="auth-tab" id="tabRegister" data-tab="register">Daftar Akun</button>
+        </div>
+
+        <!-- Form Login -->
+        <form class="auth-form" id="loginForm">
+          <label>
+            Email
+            <input type="email" id="loginEmail" required>
+          </label>
+          <label>
+            Password
+            <input type="password" id="loginPassword" required>
+          </label>
+          <button type="submit" class="btn btn--primary btn--block">Masuk</button>
+          <p class="auth-form__status" id="loginStatus"></p>
+        </form>
+
+        <!-- Form Daftar -->
+        <form class="auth-form" id="registerForm" hidden>
+          <label>
+            Nama Lengkap
+            <input type="text" id="registerName" required>
+          </label>
+          <label>
+            Email
+            <input type="email" id="registerEmail" required>
+          </label>
+          <label>
+            Nomor WhatsApp
+            <input type="tel" id="registerPhone" required>
+          </label>
+          <label>
+            Password
+            <input type="password" id="registerPassword" placeholder="minimal 6 karakter" required>
+          </label>
+          <button type="submit" class="btn btn--primary btn--block">Daftar &amp; Masuk</button>
+          <p class="auth-form__status" id="registerStatus"></p>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="js/auth.js"></script>
+</body>
+</html>
