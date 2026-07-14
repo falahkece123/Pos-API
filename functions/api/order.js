@@ -1,87 +1,93 @@
 // =====================================================================
 // functions/api/order.js
 // Endpoint ini menerima pesanan dari frontend.
-// Bisa diakses lewat: POST /api/order
+// POST /api/order
+// GET  /api/order   -> riwayat pesanan milik pelanggan yang login
 //
-// CATATAN UNTUK PEMULA:
-// Cloudflare Pages Functions bersifat "tanpa server" (serverless) dan
-// TIDAK punya penyimpanan permanen bawaan. Di kode ini, pesanan hanya
-// divalidasi lalu dikembalikan sebagai konfirmasi (dengan kode unik).
+// CATATAN: endpoint ini sekarang WAJIB LOGIN. Token dikirim frontend
+// lewat header "Authorization: Bearer <token>" yang didapat saat
+// register/login (lihat functions/api/auth/).
 //
-// Kalau nanti kamu mau pesanan benar-benar TERSIMPAN (misalnya supaya
-// bisa dilihat di dashboard admin), kamu tinggal tambahkan Cloudflare
-// KV atau Cloudflare D1 (database gratis dari Cloudflare). Ini dijelaskan
-// di README.md bagian "Langkah Lanjutan".
+// Pesanan disimpan ke tabel "orders" di Cloudflare D1, terhubung ke
+// akun pelanggan (user_id) yang mengirim pesanan.
 // =====================================================================
+
+import { json, corsPreflight, getUserFromRequest } from "./_utils.js";
 
 export async function onRequestPost(context) {
   try {
-    const body = await context.request.json();
-    const { customer, items, total } = body;
-
-    // Validasi sederhana
-    if (!customer || !customer.nama || !customer.telepon) {
-      return jsonResponse(
-        { message: "Nama dan nomor WhatsApp wajib diisi." },
-        400
+    const user = await getUserFromRequest(context);
+    if (!user) {
+      return json(
+        { message: "Kamu harus login dulu sebelum memesan." },
+        401
       );
     }
+
+    const body = await context.request.json();
+    const { items, total, catatan } = body;
+
     if (!Array.isArray(items) || items.length === 0) {
-      return jsonResponse(
-        { message: "Keranjang tidak boleh kosong." },
-        400
-      );
+      return json({ message: "Keranjang tidak boleh kosong." }, 400);
+    }
+    if (!total || total <= 0) {
+      return json({ message: "Total pesanan tidak valid." }, 400);
     }
 
     // Buat kode pesanan unik sederhana, misal: JWN-7K2P9X
-    const orderId = "JWN-" + crypto.randomUUID().slice(0, 6).toUpperCase();
+    const orderCode = "JWN-" + crypto.randomUUID().slice(0, 6).toUpperCase();
 
-    const order = {
-      orderId,
-      customer,
-      items,
-      total,
-      status: "diterima",
-      createdAt: new Date().toISOString(),
-    };
+    await context.env.DB.prepare(
+      `INSERT INTO orders (order_code, user_id, items_json, total, catatan, status)
+       VALUES (?, ?, ?, ?, ?, 'diterima')`
+    )
+      .bind(orderCode, user.id, JSON.stringify(items), total, catatan || "")
+      .run();
 
-    // --- Jika suatu saat sudah pasang Cloudflare KV, contoh simpannya: ---
-    // await context.env.JAWAIN_ORDERS.put(orderId, JSON.stringify(order));
-
-    return jsonResponse(
+    return json(
       {
-        message: "Pesanan berhasil diterima",
-        orderId,
-        order,
+        message: "Pesanan berhasil diterima dan tersimpan",
+        orderId: orderCode,
+        order: {
+          orderId: orderCode,
+          customer: { nama: user.name, telepon: user.phone },
+          items,
+          total,
+          status: "diterima",
+        },
       },
       201
     );
   } catch (err) {
-    return jsonResponse(
+    return json(
       { message: "Format data tidak valid: " + err.message },
       400
     );
   }
 }
 
-// Tangani preflight CORS (kalau frontend & backend beda domain)
-export async function onRequestOptions() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
+// Riwayat pesanan pelanggan yang sedang login
+export async function onRequestGet(context) {
+  const user = await getUserFromRequest(context);
+  if (!user) {
+    return json({ message: "Kamu harus login dulu." }, 401);
+  }
+
+  const { results } = await context.env.DB.prepare(
+    `SELECT id, order_code, items_json, total, catatan, status, created_at
+     FROM orders WHERE user_id = ? ORDER BY created_at DESC`
+  )
+    .bind(user.id)
+    .all();
+
+  const orders = results.map((o) => ({
+    ...o,
+    items: JSON.parse(o.items_json),
+  }));
+
+  return json({ orders });
 }
 
-function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-  });
+export async function onRequestOptions() {
+  return corsPreflight();
 }
