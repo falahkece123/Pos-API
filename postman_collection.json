@@ -1,17 +1,100 @@
 {
   "info": {
     "name": "JAWAIN API",
-    "description": "Koleksi Postman untuk menguji API backend JAWAIN (Cloudflare Pages Functions). Ganti variable base_url sesuai kebutuhan (localhost saat dev, atau domain Cloudflare setelah deploy).",
+    "description": "Koleksi Postman untuk menguji API backend JAWAIN (Cloudflare Pages Functions). Ganti variable base_url sesuai kebutuhan (localhost saat dev, atau domain Cloudflare setelah deploy). Alur testing yang disarankan: 1) Daftar Akun -> otomatis dapat token -> tersimpan di variable auth_token. 2) Ambil Daftar Menu. 3) Kirim Pesanan (pakai token dari langkah 1).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {
-      "key": "base_url",
-      "value": "http://localhost:8788",
-      "type": "string"
-    }
+    { "key": "base_url", "value": "http://localhost:8788", "type": "string" },
+    { "key": "auth_token", "value": "", "type": "string" }
   ],
   "item": [
+    {
+      "name": "Auth - Daftar Akun",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "  const data = pm.response.json();",
+              "  pm.collectionVariables.set('auth_token', data.token);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Rangga\",\n  \"email\": \"rangga@example.com\",\n  \"phone\": \"08123456789\",\n  \"password\": \"rahasia123\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/register",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "register"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Auth - Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  const data = pm.response.json();",
+              "  pm.collectionVariables.set('auth_token', data.token);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"rangga@example.com\",\n  \"password\": \"rahasia123\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/login",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Auth - Cek Siapa yang Login",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+        "url": {
+          "raw": "{{base_url}}/api/auth/me",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "me"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Auth - Logout",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+        "url": {
+          "raw": "{{base_url}}/api/auth/me",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "me"]
+        }
+      },
+      "response": []
+    },
     {
       "name": "Ambil Daftar Menu",
       "request": {
@@ -26,18 +109,16 @@
       "response": []
     },
     {
-      "name": "Kirim Pesanan",
+      "name": "Kirim Pesanan (butuh login)",
       "request": {
         "method": "POST",
         "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{auth_token}}" }
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"customer\": {\n    \"nama\": \"Rangga\",\n    \"telepon\": \"08123456789\",\n    \"catatan\": \"Gula sedikit ya\"\n  },\n  \"items\": [\n    { \"id\": \"1\", \"name\": \"Kopi Susu Gula Aren\", \"qty\": 2, \"price\": 22000 },\n    { \"id\": \"7\", \"name\": \"Roti Bakar Cokelat Keju\", \"qty\": 1, \"price\": 17000 }\n  ],\n  \"total\": 61000\n}"
+          "raw": "{\n  \"items\": [\n    { \"id\": \"1\", \"name\": \"Kopi Susu Gula Aren\", \"qty\": 2, \"price\": 22000 },\n    { \"id\": \"7\", \"name\": \"Roti Bakar Cokelat Keju\", \"qty\": 1, \"price\": 17000 }\n  ],\n  \"total\": 61000,\n  \"catatan\": \"Gula sedikit ya\"\n}"
         },
         "url": {
           "raw": "{{base_url}}/api/order",
@@ -48,19 +129,27 @@
       "response": []
     },
     {
-      "name": "Kirim Pesanan (Data Tidak Lengkap - contoh error)",
+      "name": "Kirim Pesanan Tanpa Login (contoh error 401)",
       "request": {
         "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"customer\": {\n    \"nama\": \"\"\n  },\n  \"items\": []\n}"
+          "raw": "{\n  \"items\": [\n    { \"id\": \"1\", \"name\": \"Kopi Susu Gula Aren\", \"qty\": 1, \"price\": 22000 }\n  ],\n  \"total\": 22000\n}"
         },
+        "url": {
+          "raw": "{{base_url}}/api/order",
+          "host": ["{{base_url}}"],
+          "path": ["api", "order"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Riwayat Pesanan Saya (butuh login)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
         "url": {
           "raw": "{{base_url}}/api/order",
           "host": ["{{base_url}}"],
